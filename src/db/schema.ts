@@ -13,6 +13,9 @@ export const AREAS = [
 
 export type Area = (typeof AREAS)[number];
 
+export const SOURCE_TYPES = ["debrief", "research", "guideline", "other"] as const;
+export type SourceType = (typeof SOURCE_TYPES)[number];
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -45,25 +48,6 @@ export const subscriptions = pgTable(
   ]
 );
 
-export const usersRelations = relations(users, ({ many }) => ({
-  subscriptions: many(subscriptions),
-}));
-
-export const topicsRelations = relations(topics, ({ many }) => ({
-  subscriptions: many(subscriptions),
-}));
-
-export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
-  user: one(users, {
-    fields: [subscriptions.userId],
-    references: [users.id],
-  }),
-  topic: one(topics, {
-    fields: [subscriptions.topicId],
-    references: [topics.id],
-  }),
-}));
-
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
@@ -72,9 +56,6 @@ export const notifications = pgTable("notifications", {
   isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
-
-export const SOURCE_TYPES = ["debrief", "research", "guideline", "other"] as const;
-export type SourceType = (typeof SOURCE_TYPES)[number];
 
 export const sources = pgTable("sources", {
   id: serial("id").primaryKey(),
@@ -91,3 +72,43 @@ export const sources = pgTable("sources", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  subscriptions: many(subscriptions),
+  notifications: many(notifications),
+}));
+
+export const topicsRelations = relations(topics, ({ many }) => ({
+  subscriptions: many(subscriptions),
+  sources: many(sources),
+  notifications: many(notifications),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [subscriptions.userId],
+    references: [users.id],
+  }),
+  topic: one(topics, {
+    fields: [subscriptions.topicId],
+    references: [topics.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  topic: one(topics, {
+    fields: [notifications.topicId],
+    references: [topics.id],
+  }),
+}));
+
+export const sourcesRelations = relations(sources, ({ one }) => ({
+  topic: one(topics, {
+    fields: [sources.topicId],
+    references: [topics.id],
+  }),
+}));
