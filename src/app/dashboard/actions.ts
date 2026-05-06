@@ -66,10 +66,14 @@ Keep insights actionable and brief. Start with your first insight:`;
     });
 
     // Extract text from response
-    console.log("[Dashboard] LLM Response:", JSON.stringify(response, null, 2));
+    console.log("[Dashboard] LLM Response type:", typeof response);
+    console.log("[Dashboard] LLM Response keys:", Object.keys(response));
+    console.log("[Dashboard] LLM Response:", response);
 
     if (!response.content) {
-      console.error("[Dashboard] Response has no content property. Full response:", response);
+      console.error("[Dashboard] Response structure missing 'content' field");
+      console.error("[Dashboard] Available keys:", Object.keys(response));
+      console.error("[Dashboard] Full response:", response);
       throw new Error("Unexpected LLM response format - no content field");
     }
 
