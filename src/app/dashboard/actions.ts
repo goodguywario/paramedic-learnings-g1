@@ -66,6 +66,13 @@ Keep insights actionable and brief. Start with your first insight:`;
     });
 
     // Extract text from response
+    console.log("[Dashboard] LLM Response:", JSON.stringify(response, null, 2));
+
+    if (!response.content) {
+      console.error("[Dashboard] Response has no content property. Full response:", response);
+      throw new Error("Unexpected LLM response format - no content field");
+    }
+
     const textBlock = response.content.find(
       (block): block is Anthropic.TextBlock => block.type === "text",
     );
