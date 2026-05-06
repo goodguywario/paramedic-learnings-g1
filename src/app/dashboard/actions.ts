@@ -75,18 +75,37 @@ Keep insights actionable and brief. Start with your first insight:`;
 
     throw new Error("No text content in LLM response");
   } catch (error) {
-    console.error("[Dashboard] Failed to generate insights:", error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error("[Dashboard] Failed to generate insights:", errorMsg);
 
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
+
+      // Connection/network errors
+      if (msg.includes("econnrefused") || msg.includes("connect")) {
+        console.error("[Dashboard] LM Studio connection failed. Check LM_STUDIO_API_URL and ensure LM Studio is running.");
+        throw new Error("Cannot connect to LM model server. Check that LM Studio is running at " + process.env.LM_STUDIO_API_URL);
+      }
+
+      // API key errors
       if (msg.includes("api") && msg.includes("key")) {
+        console.error("[Dashboard] API key configuration error");
         throw new Error("API configuration error. Please check your environment variables.");
       }
+
+      // Model not found errors
+      if (msg.includes("model") || msg.includes("404")) {
+        console.error("[Dashboard] Model not found. Check LM_STUDIO_MODEL in .env.local");
+        throw new Error("Model not found. Verify LM_STUDIO_MODEL setting matches a loaded model in LM Studio.");
+      }
+
+      // Response parsing errors
       if (msg.includes("no text content")) {
         throw new Error("Failed to parse LLM response. Please try again.");
       }
     }
 
-    throw new Error("Unable to generate insights. Please try again later.");
+    console.error("[Dashboard] Full error details:", error);
+    throw new Error("Unable to generate insights. Check the browser console for details.");
   }
 }
