@@ -96,7 +96,14 @@ Insight 3: Immediate next steps (what to prioritize)
       (block): block is Anthropic.TextBlock => block.type === "text",
     );
     if (textBlock) {
-      return textBlock.text;
+      // Extract only the numbered insights, stripping any reasoning/thinking text
+      const text = textBlock.text;
+      const insightsStart = text.indexOf("1.");
+      if (insightsStart !== -1) {
+        return text.substring(insightsStart);
+      }
+      // If "1." not found, return the text as-is (shouldn't happen with working prompt)
+      return text;
     }
 
     throw new Error("No text content in LLM response");
