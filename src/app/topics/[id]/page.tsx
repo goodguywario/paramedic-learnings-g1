@@ -1,8 +1,10 @@
 import { db } from "@/db";
-import { topics } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { topics, subscriptions } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { formatAge } from "../utils";
+import { SubscribeButton } from "../SubscribeButton";
+import { getSessionUser } from "@/lib/auth";
 
 export default async function TopicDetailPage({
   params,
@@ -21,6 +23,18 @@ export default async function TopicDetailPage({
 
   if (!topic) notFound();
 
+  const user = await getSessionUser();
+  let isSubscribed = false;
+
+  if (user) {
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(and(eq(subscriptions.userId, user.id), eq(subscriptions.topicId, id)))
+      .limit(1);
+    isSubscribed = !!subscription;
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
       <a
@@ -30,15 +44,18 @@ export default async function TopicDetailPage({
         ← Topics
       </a>
 
-      <div className="flex items-start gap-3 mb-2">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 leading-tight">
-          {topic.title}
-        </h1>
-        {topic.area && (
-          <span className="mt-1.5 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 shrink-0">
-            {topic.area}
-          </span>
-        )}
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex items-start gap-3">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 leading-tight">
+            {topic.title}
+          </h1>
+          {topic.area && (
+            <span className="mt-1.5 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 shrink-0">
+              {topic.area}
+            </span>
+          )}
+        </div>
+        <SubscribeButton topicId={id} initialSubscribed={isSubscribed} />
       </div>
 
       <p className="text-slate-500 text-lg mb-3 leading-relaxed">{topic.summary}</p>

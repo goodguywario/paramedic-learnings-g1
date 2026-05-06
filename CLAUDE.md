@@ -27,7 +27,23 @@ npm run build
 # Database migrations (after editing src/db/schema.ts)
 npx drizzle-kit generate
 npx drizzle-kit migrate
+
+# Type check
+npm run type-check
+
+# Tests
+npm run test
 ```
+
+## Environment Setup
+
+Create a `.env.local` file in the project root:
+
+```
+DATABASE_URL=postgresql://postgres:postgres@localhost:15432/paramedic_learnings
+```
+
+The Docker Compose setup creates the database automatically when you run `docker compose up -d`.
 
 ## Architecture
 
@@ -53,3 +69,9 @@ Key entities from `docs/user-stories.md`:
 - **Subscription** — (stretch) links a user to a topic for notifications
 
 Build Story 1 first — every other story depends on topics existing in the database.
+
+## Gotchas
+
+- **Database migrations fail**: If migrations are out of sync, reset with `docker compose down -v && docker compose up -d`, then re-run `npx drizzle-kit migrate`
+- **Hot reload not working**: Restart the dev server with `npm run dev`; Drizzle schema changes sometimes need a full restart
+- **TypeScript errors after schema changes**: Run `npm run type-check` to regenerate types before building

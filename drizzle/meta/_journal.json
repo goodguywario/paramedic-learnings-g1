@@ -15,6 +15,20 @@
       "when": 1777980085922,
       "tag": "0001_clean_wolf_cub",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778057539573,
+      "tag": "0002_certain_nebula",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778058041748,
+      "tag": "0003_confused_moondragon",
+      "breakpoints": true
     }
   ]
 }

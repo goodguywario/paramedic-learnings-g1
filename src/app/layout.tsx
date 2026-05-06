@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import UserProfile from "./components/UserProfile";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +37,12 @@ export default function RootLayout({
                 Paramedic Learnings
               </span>
             </a>
-            <nav className="flex items-center gap-6">
+            <div className="flex items-center gap-6">
               <a href="/topics" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                 Topics
               </a>
-            </nav>
+              <UserProfile />
+            </div>
           </div>
         </header>
         <main className="flex-1">{children}</main>
