@@ -53,24 +53,21 @@ export async function generateInsights(
       .map(([area, count]) => `${area} (${count} topics)`)
       .join(", ");
 
-    const prompt = `You are an analyst reviewing a medical guidance knowledge base for ambulance personnel.
+    const sourcedTopics = validTopics.filter((t) => t.sourceCount > 0).length;
+    const prompt = `Analyze this medical guidance knowledge base and provide 3 brief, actionable insights.
 
-KNOWLEDGE BASE SUMMARY:
-- Total topics: ${validTopics.length}
-- Clinical areas: ${areaBreakdown}
-- Topics with sources: ${validTopics.filter((t) => t.sourceCount > 0).length}
+Facts:
+- ${validTopics.length} total topics
+- ${sourcedTopics} topics have sources
+- Areas: ${areaBreakdown}
 
-Provide exactly 3-4 insights about this knowledge base. Each insight should be 2-3 sentences and actionable.
+Output ONLY the insights, numbered 1-3. Each insight is 1-2 sentences. No preamble, no thinking, no explanations.
 
-FORMAT: Do NOT include thinking, reasoning, or meta-commentary. Only provide clean, polished insights with no preamble or explanation of your analysis process.
+Insight 1: Coverage assessment (which areas are strongest, which are gaps)
+Insight 2: Source support (what critical topics need evidence)
+Insight 3: Immediate next steps (what to prioritize)
 
-Focus on:
-1. Coverage strength (which areas are well/poorly covered relative to importance)
-2. Source support gaps (which critical topics need more evidence)
-3. Recommended priorities for improvement
-4. Operational readiness assessment
-
-Insights:`;
+1. `;
 
     const response = await client.messages.create({
       model: modelName,
