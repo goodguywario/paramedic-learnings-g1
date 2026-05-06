@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import {
   chat,
   ChatMessage,
@@ -162,8 +163,28 @@ export function ChatWidget() {
 
                 {msg.role === "assistant" && (
                   <div className="flex flex-col gap-1">
-                    <div className="max-w-[85%] whitespace-pre-wrap rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-800">
-                      {msg.content}
+                    <div className="max-w-[85%] rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-800">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="mb-2 ml-4 list-disc" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="mb-2 ml-4 list-decimal" {...props} />,
+                          li: ({ node, ...props }) => <li className="mb-0.5" {...props} />,
+                          h1: ({ node, ...props }) => <h1 className="mb-1 text-base font-bold text-slate-900" {...props} />,
+                          h2: ({ node, ...props }) => <h2 className="mb-1 text-sm font-bold text-slate-900" {...props} />,
+                          h3: ({ node, ...props }) => <h3 className="mb-1 text-sm font-semibold text-slate-900" {...props} />,
+                          strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
+                          em: ({ node, ...props }) => <em className="italic" {...props} />,
+                          code: ({ node, inline, ...props }: any) =>
+                            inline ? (
+                              <code className="rounded bg-slate-200 px-1 py-0.5 font-mono text-xs text-slate-900" {...props} />
+                            ) : (
+                              <code className="mb-2 block overflow-x-auto rounded bg-slate-200 p-2 font-mono text-xs text-slate-900" {...props} />
+                            ),
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
                     </div>
                     {msg.sources && msg.sources.length > 0 && (
                       <div className="flex max-w-[85%] flex-wrap gap-1">
