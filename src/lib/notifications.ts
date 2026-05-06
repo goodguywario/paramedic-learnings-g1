@@ -1,4 +1,6 @@
-import { SessionUser } from "./auth";
+import { db } from "@/db";
+import { subscriptions, notifications } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export interface NotificationPayload {
   userId: number;
@@ -16,19 +18,6 @@ export async function sendNotification(
     `[NOTIFICATION STUB] Would send ${payload.action} notification to ${payload.userEmail}`,
     payload
   );
-
-  if (process.env.EMAIL_SERVICE_API_KEY) {
-    try {
-      // This will be implemented in Story 8 with real email service
-      // await emailService.send({
-      //   to: payload.userEmail,
-      //   subject: `Topic "${payload.topicTitle}" ${payload.action}`,
-      //   body: ...
-      // });
-    } catch (error) {
-      console.error("Failed to send notification:", error);
-    }
-  }
 }
 
 export async function notifyTopicSubscribers(
@@ -36,8 +25,19 @@ export async function notifyTopicSubscribers(
   topicTitle: string,
   action: "updated" | "conflict_flagged"
 ): Promise<void> {
-  console.log(
-    `[NOTIFICATION STUB] Would notify subscribers of topic "${topicTitle}" about ${action}`
+  const subs = await db
+    .select({ userId: subscriptions.userId })
+    .from(subscriptions)
+    .where(eq(subscriptions.topicId, topicId));
+
+  if (subs.length === 0) return;
+
+  const message =
+    action === "updated"
+      ? `"${topicTitle}" has been updated with new guidance.`
+      : `"${topicTitle}" may conflict with newly submitted evidence.`;
+
+  await db.insert(notifications).values(
+    subs.map(({ userId }) => ({ userId, topicId, message }))
   );
-  // Story 8: Query subscriptions table and send email to all subscribers
 }

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { db } from "@/db";
 import { topics, AREAS } from "@/db/schema";
 import { desc, ilike, eq, and, or } from "drizzle-orm";
@@ -46,13 +47,13 @@ export default async function TopicsPage({
             Operational guidance for ambulance personnel
           </p>
         </div>
-        <a
+        <Link
           href="/topics/new"
           className="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 transition-colors shrink-0"
         >
           <span aria-hidden className="text-emerald-400">+</span>
           New Topic
-        </a>
+        </Link>
       </div>
 
       <div className="mb-6">
@@ -70,22 +71,22 @@ export default async function TopicsPage({
           <p className="text-slate-400 text-sm mt-1 mb-6">
             Create the first operational guidance topic.
           </p>
-          <a
+          <Link
             href="/topics/new"
             className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
           >
             Create a topic →
-          </a>
+          </Link>
         </div>
       ) : allTopics.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <p className="text-slate-500 font-medium">No topics match your search</p>
-          <a
+          <Link
             href="/topics"
             className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors mt-3"
           >
             Clear filters
-          </a>
+          </Link>
         </div>
       ) : (
         <ul className="space-y-3">

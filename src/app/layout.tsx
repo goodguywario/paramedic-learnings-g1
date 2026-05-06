@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
 import UserProfile from "./components/UserProfile";
 
 const geistSans = Geist({
@@ -32,15 +33,18 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-slate-50 font-[family-name:var(--font-geist-sans)]">
         <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-            <a href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <span className="text-lg font-bold text-slate-900">
                 Paramedic Learnings
               </span>
-            </a>
+            </Link>
             <div className="flex items-center gap-6">
-              <a href="/topics" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+              <Link href="/topics" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                 Topics
-              </a>
+              </Link>
+              <Link href="/sources" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                Sources
+              </Link>
               <UserProfile />
             </div>
           </div>

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-20">
@@ -11,13 +13,13 @@ export default function Home() {
         </p>
       </div>
       <div className="mt-10">
-        <a
+        <Link
           href="/topics"
           className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
         >
           Browse Topics
           <span aria-hidden>→</span>
-        </a>
+        </Link>
       </div>
     </div>
   );

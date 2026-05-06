@@ -6,7 +6,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
-import { sendNotification } from "@/lib/notifications";
+import { sendNotification, notifyTopicSubscribers } from "@/lib/notifications";
 import { eq, and } from "drizzle-orm";
 
 const CreateTopicSchema = z.object({
@@ -111,4 +111,44 @@ export async function toggleSubscription(
 
   revalidatePath(`/topics/${topicId}`);
   return { isSubscribed };
+}
+
+const UpdateGuidanceSchema = z.object({
+  guidance: z.string().min(1, "Guidance is required"),
+});
+
+export type UpdateGuidanceState = {
+  error?: string;
+  success?: boolean;
+} | null;
+
+// TODO: restrict to topic owners or admins once a role/ownership model exists.
+// Currently any authenticated user can update any topic's guidance.
+export async function updateTopicGuidance(
+  topicId: number,
+  _prevState: UpdateGuidanceState,
+  formData: FormData
+): Promise<UpdateGuidanceState> {
+  const user = await getSessionUser();
+  if (!user) return { error: "Authentication required" };
+
+  const result = UpdateGuidanceSchema.safeParse({
+    guidance: formData.get("guidance"),
+  });
+  if (!result.success) {
+    return { error: result.error.flatten().fieldErrors.guidance?.[0] };
+  }
+
+  const [updated] = await db
+    .update(topics)
+    .set({ guidance: result.data.guidance, updatedAt: new Date() })
+    .where(eq(topics.id, topicId))
+    .returning({ title: topics.title });
+
+  if (!updated) return { error: "Topic not found" };
+
+  await notifyTopicSubscribers(topicId, updated.title, "updated");
+
+  revalidatePath(`/topics/${topicId}`);
+  return { success: true };
 }

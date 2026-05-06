@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, boolean, integer, primaryKey } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const AREAS = [
@@ -36,8 +36,8 @@ export const topics = pgTable("topics", {
 export const subscriptions = pgTable(
   "subscriptions",
   {
-    userId: serial("user_id").notNull(),
-    topicId: serial("topic_id").notNull(),
+    userId: integer("user_id").notNull().references(() => users.id),
+    topicId: integer("topic_id").notNull().references(() => topics.id),
     subscribedAt: timestamp("subscribed_at").defaultNow().notNull(),
   },
   (table) => [
@@ -63,3 +63,31 @@ export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
     references: [topics.id],
   }),
 }));
+
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  topicId: integer("topic_id").notNull().references(() => topics.id),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const SOURCE_TYPES = ["debrief", "research", "guideline", "other"] as const;
+export type SourceType = (typeof SOURCE_TYPES)[number];
+
+export const sources = pgTable("sources", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  sourceType: text("source_type").notNull(),
+  submittedBy: text("submitted_by").notNull().default("system"),
+  topicId: integer("topic_id").references(() => topics.id),
+  // AI-generated fields (Stories 12, 13, 14)
+  aiSummary: text("ai_summary"),
+  suggestedTopicId: integer("suggested_topic_id").references(() => topics.id),
+  conflictFlag: boolean("conflict_flag"),
+  conflictReason: text("conflict_reason"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

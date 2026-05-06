@@ -2,9 +2,11 @@ import { db } from "@/db";
 import { topics, subscriptions } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { formatAge } from "../utils";
 import { SubscribeButton } from "../SubscribeButton";
 import { getSessionUser } from "@/lib/auth";
+import { EditGuidanceForm } from "./EditGuidanceForm";
 
 export default async function TopicDetailPage({
   params,
@@ -37,12 +39,12 @@ export default async function TopicDetailPage({
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
-      <a
+      <Link
         href="/topics"
         className="text-sm text-slate-500 hover:text-slate-700 transition-colors mb-8 inline-block"
       >
         ← Topics
-      </a>
+      </Link>
 
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex items-start gap-3">
@@ -55,7 +57,16 @@ export default async function TopicDetailPage({
             </span>
           )}
         </div>
-        <SubscribeButton topicId={id} initialSubscribed={isSubscribed} />
+        {user ? (
+          <SubscribeButton topicId={id} initialSubscribed={isSubscribed} />
+        ) : (
+          <a
+            href={`/auth/login`}
+            className="inline-flex items-center rounded-lg px-3.5 py-2 text-sm font-medium bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+          >
+            Login to subscribe
+          </a>
+        )}
       </div>
 
       <p className="text-slate-500 text-lg mb-3 leading-relaxed">{topic.summary}</p>
@@ -71,6 +82,7 @@ export default async function TopicDetailPage({
         <div className="rounded-lg border border-slate-200 bg-white px-6 py-5 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
           {topic.guidance}
         </div>
+        {user && <EditGuidanceForm topicId={id} currentGuidance={topic.guidance} />}
       </div>
 
       {topic.rationale && (

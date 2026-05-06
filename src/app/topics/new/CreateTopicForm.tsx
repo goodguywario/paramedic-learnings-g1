@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { createTopic, type CreateTopicState } from "../actions";
 import { AREAS } from "@/db/schema";
 
@@ -115,12 +116,12 @@ export function CreateTopicForm() {
             "Create Topic"
           )}
         </button>
-        <a
+        <Link
           href="/topics"
           className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
         >
           Cancel
-        </a>
+        </Link>
       </div>
     </form>
   );

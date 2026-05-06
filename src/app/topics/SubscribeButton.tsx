@@ -40,7 +40,7 @@ export function SubscribeButton({
       </button>
       {isSubscribed && (
         <span className="text-sm text-slate-500">
-          You're subscribed to updates
+          You&apos;re subscribed to updates
         </span>
       )}
     </div>
