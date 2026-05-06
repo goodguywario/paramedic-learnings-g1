@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { generateInsights, TopicWithSourceCount } from "../actions";
 
 interface InsightsClientProps {
@@ -68,8 +69,28 @@ export function InsightsClient({ topics }: InsightsClientProps) {
       )}
 
       {insights && !loading && (
-        <div className="prose prose-sm max-w-none text-slate-700">
-          <p className="whitespace-pre-wrap">{insights}</p>
+        <div className="prose prose-sm max-w-none text-slate-700 prose-headings:text-slate-900 prose-p:text-slate-700 prose-li:text-slate-700">
+          <ReactMarkdown
+            components={{
+              p: ({ node, ...props }) => <p className="mb-3 last:mb-0" {...props} />,
+              ul: ({ node, ...props }) => <ul className="mb-3 ml-4 list-disc" {...props} />,
+              ol: ({ node, ...props }) => <ol className="mb-3 ml-4 list-decimal" {...props} />,
+              li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+              h1: ({ node, ...props }) => <h1 className="text-xl font-bold mb-2 text-slate-900" {...props} />,
+              h2: ({ node, ...props }) => <h2 className="text-lg font-bold mb-2 text-slate-900" {...props} />,
+              h3: ({ node, ...props }) => <h3 className="text-base font-semibold mb-2 text-slate-900" {...props} />,
+              strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
+              em: ({ node, ...props }) => <em className="italic" {...props} />,
+              code: ({ node, inline, ...props }: any) =>
+                inline ? (
+                  <code className="bg-slate-100 px-1.5 py-0.5 rounded text-sm font-mono text-slate-900" {...props} />
+                ) : (
+                  <code className="block bg-slate-100 p-3 rounded mb-3 font-mono text-sm text-slate-900 overflow-x-auto" {...props} />
+                ),
+            }}
+          >
+            {insights}
+          </ReactMarkdown>
         </div>
       )}
     </div>
