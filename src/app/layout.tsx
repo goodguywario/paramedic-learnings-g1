@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import UserProfile from "./components/UserProfile";
+import { ChatWidget } from "./components/ChatWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({
         <footer className="border-t border-slate-200 bg-white py-6 text-center text-sm text-slate-400">
           Built for ambulance personnel — share knowledge, save lives.
         </footer>
+        <ChatWidget />
       </body>
     </html>
   );
