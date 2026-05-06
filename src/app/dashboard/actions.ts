@@ -1,5 +1,6 @@
 "use server";
 
+import { Anthropic } from "@anthropic-ai/sdk";
 import { getLLMClient, getModelName } from "@/lib/llm-client";
 
 // Simple validation
@@ -18,12 +19,20 @@ export async function generateInsights(
     return "No topics in the knowledge base yet. Create a topic to get started.";
   }
 
+  // Validate topic array elements
+  const validTopics = topics.filter(
+    (t) => t.title && typeof t.sourceCount === "number" && t.sourceCount >= 0,
+  );
+  if (validTopics.length === 0) {
+    return "No valid topics in the knowledge base yet.";
+  }
+
   try {
-    const { client, isLocal } = await getLLMClient();
+    const { client } = await getLLMClient();
     const modelName = getModelName();
 
     // Format topics for the LLM prompt
-    const topicsList = topics
+    const topicsList = validTopics
       .map(
         (t) =>
           `- ${t.title} (${t.area || "uncategorized"}) — ${t.sourceCount} source${t.sourceCount !== 1 ? "s" : ""}`,
@@ -35,8 +44,8 @@ export async function generateInsights(
 Topics in the knowledge base:
 ${topicsList}
 
-Total topics: ${topics.length}
-Clinical areas covered: ${new Set(topics.map((t) => t.area || "uncategorized")).size}
+Total topics: ${validTopics.length}
+Clinical areas covered: ${new Set(validTopics.map((t) => t.area || "uncategorized")).size}
 
 Provide insights in plain prose (2-3 sentences each). Focus on:
 1. Which clinical/operational areas are well-covered vs. sparse
@@ -57,22 +66,23 @@ Keep insights actionable and brief. Start with your first insight:`;
     });
 
     // Extract text from response
-    const textBlock = response.content.find((block) => block.type === "text");
-    if (textBlock && textBlock.type === "text") {
+    const textBlock = response.content.find(
+      (block): block is Anthropic.TextBlock => block.type === "text",
+    );
+    if (textBlock) {
       return textBlock.text;
     }
 
     throw new Error("No text content in LLM response");
   } catch (error) {
-    // Log error for debugging
     console.error("[Dashboard] Failed to generate insights:", error);
 
-    // Return user-friendly error message
     if (error instanceof Error) {
-      if (error.message.includes("API key")) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("api") && msg.includes("key")) {
         throw new Error("API configuration error. Please check your environment variables.");
       }
-      if (error.message.includes("No text content")) {
+      if (msg.includes("no text content")) {
         throw new Error("Failed to parse LLM response. Please try again.");
       }
     }
