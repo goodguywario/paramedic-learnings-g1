@@ -1,6 +1,8 @@
 import { db } from "@/db";
 import { topics, sources } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { getSessionUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { InsightsClient } from "./components/InsightsClient";
 import { TopicList } from "./components/TopicList";
 
@@ -10,7 +12,11 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
-  // TODO: Add authentication check (see Task 8)
+  // Verify user is authenticated
+  const user = await getSessionUser();
+  if (!user) {
+    redirect("/auth/login");
+  }
 
   // Fetch all topics with source counts
   const topicsWithCounts = await db
