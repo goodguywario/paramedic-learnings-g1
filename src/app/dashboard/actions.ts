@@ -39,20 +39,38 @@ export async function generateInsights(
       )
       .join("\n");
 
-    const prompt = `You are an analyst reviewing a medical guidance knowledge base for ambulance personnel. Analyze these operational topics and provide 3-4 key insights about coverage, gaps, and patterns.
+    const areaBreakdown = Object.entries(
+      validTopics.reduce(
+        (acc, t) => {
+          const area = t.area || "uncategorized";
+          acc[area] = (acc[area] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
+    )
+      .sort(([, a], [, b]) => b - a)
+      .map(([area, count]) => `${area} (${count} topics)`)
+      .join(", ");
 
-Topics in the knowledge base:
-${topicsList}
+    const prompt = `You are an analyst reviewing a medical guidance knowledge base for ambulance personnel.
 
-Total topics: ${validTopics.length}
-Clinical areas covered: ${new Set(validTopics.map((t) => t.area || "uncategorized")).size}
+KNOWLEDGE BASE SUMMARY:
+- Total topics: ${validTopics.length}
+- Clinical areas: ${areaBreakdown}
+- Topics with sources: ${validTopics.filter((t) => t.sourceCount > 0).length}
 
-Provide insights in plain prose (2-3 sentences each). Focus on:
-1. Which clinical/operational areas are well-covered vs. sparse
-2. Any notable patterns or gaps in guidance
-3. Recommendations for the knowledge base (optional)
+Provide exactly 3-4 insights about this knowledge base. Each insight should be 2-3 sentences and actionable.
 
-Keep insights actionable and brief. Start with your first insight:`;
+FORMAT: Do NOT include thinking, reasoning, or meta-commentary. Only provide clean, polished insights with no preamble or explanation of your analysis process.
+
+Focus on:
+1. Coverage strength (which areas are well/poorly covered relative to importance)
+2. Source support gaps (which critical topics need more evidence)
+3. Recommended priorities for improvement
+4. Operational readiness assessment
+
+Insights:`;
 
     const response = await client.messages.create({
       model: modelName,
