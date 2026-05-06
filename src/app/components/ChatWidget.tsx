@@ -20,15 +20,33 @@ export function ChatWidget() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsOpen(false);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = input.trim();
-    if (!trimmed || isLoading) return;
+    if (!trimmed || isLoading || isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
     setInput("");
     setMessages((prev) => [
@@ -69,6 +87,7 @@ export function ChatWidget() {
       ]);
     } finally {
       setIsLoading(false);
+      isSubmittingRef.current = false;
     }
   }
 
@@ -90,6 +109,7 @@ export function ChatWidget() {
             strokeLinecap="round"
             strokeLinejoin="round"
             className="h-5 w-5"
+            aria-hidden="true"
           >
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
@@ -104,6 +124,7 @@ export function ChatWidget() {
             strokeLinecap="round"
             strokeLinejoin="round"
             className="h-5 w-5"
+            aria-hidden="true"
           >
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
@@ -122,7 +143,7 @@ export function ChatWidget() {
           </div>
 
           {/* Message list */}
-          <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
+          <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3" aria-live="polite" aria-relevant="additions">
             {messages.length === 0 && (
               <p className="mt-8 text-center text-sm text-slate-400">
                 Ask me anything about the operational guidance.
@@ -148,7 +169,7 @@ export function ChatWidget() {
                       <div className="flex max-w-[85%] flex-wrap gap-1">
                         {msg.sources.map((s) => (
                           <a
-                            key={s.topicId}
+                            key={`${s.topicId}-${s.topicTitle}`}
                             href={`/topics/${s.topicId}`}
                             className="text-xs text-slate-400 underline hover:text-slate-700"
                           >
@@ -186,6 +207,7 @@ export function ChatWidget() {
           >
             <div className="flex gap-2">
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -196,7 +218,7 @@ export function ChatWidget() {
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                aria-label="Send"
+                aria-label={isLoading ? "Sending..." : "Send"}
                 className="flex items-center justify-center rounded-lg bg-slate-900 px-3 py-2 text-white transition-colors hover:bg-slate-700 disabled:opacity-50"
               >
                 <svg
