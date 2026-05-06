@@ -1,17 +1,8 @@
-import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { topics, sources } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { InsightsClient } from "./components/InsightsClient";
 import { TopicList } from "./components/TopicList";
-
-// Check authentication (adjust based on your auth implementation)
-async function getAuthenticatedUser() {
-  // TODO: Replace with your actual auth check
-  // For now, assume user is authenticated
-  // In production, verify session/JWT token
-  return { id: 1, name: "User" };
-}
 
 export const metadata = {
   title: "Dashboard — Paramedic Learnings",
@@ -19,11 +10,7 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
-  // Check authentication
-  const user = await getAuthenticatedUser();
-  if (!user) {
-    redirect("/auth/login");
-  }
+  // TODO: Add authentication check (see Task 8)
 
   // Fetch all topics with source counts
   const topicsWithCounts = await db
